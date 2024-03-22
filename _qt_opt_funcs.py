@@ -26,7 +26,11 @@ import os
 SPARSE_REWARD=False
 SCREEN_SHOT=False
     
+<<<<<<< HEAD
 def collect_interaction_data(qt_opt,
+=======
+def collect_interaction_data(replay_buffer,
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
                             env,
                             max_episodes = 4500, 
                             max_steps = 150, 
@@ -39,6 +43,7 @@ def collect_interaction_data(qt_opt,
         episode_reward = 0
         for step in range(max_steps):
             if use_noisy_expert:
+<<<<<<< HEAD
                 #goal_joint_angles = env.compute_ik(env.target_pos)
                 # print(env.target_pos, env.compute_fk(env.goal_joint_angles),env.compute_fk(env.joint_angles))
                 # print( env.goal_joint_angles, env.joint_angles)
@@ -62,6 +67,28 @@ def collect_interaction_data(qt_opt,
             print("saving buffer")
             with open(qt_opt.replay_buffer.file_name, 'wb') as file: 
                 pickle.dump(qt_opt.replay_buffer.buffer, file) 
+=======
+                goal_joint_angles = env.compute_ik(env.target_pos)
+                action = qt_opt.get_epsilon_greedy_action(goal_joint_angles, env.joint_angles)
+            else: 
+                action = qt_opt.cem_optimal_action(state)
+            if debug and step % 3000 == 0: 
+                print("action:", action)
+                print("state: ", state)
+            next_state, reward, done, _ = env.step(action, SPARSE_REWARD, SCREEN_SHOT)
+            episode_reward += reward
+            replay_buffer.push(state, action, reward, next_state, done)
+            state = next_state
+        episode_rewards.append(episode_reward)    
+                    
+        print("Using expert? ", use_noisy_expert)
+        print("length of replay buffer: {} | Episode: {} | Episode reward: {}".format(len(replay_buffer), i_episode, episode_reward))
+        
+        if len(replay_buffer) % (max_steps*20) == 0: 
+            print("saving buffer")
+            with open(replay_buffer.file_name, 'wb') as file: 
+                pickle.dump(replay_buffer.buffer, file) 
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
         if i_episode% 10==0:
             plot(episode_rewards)
             plot_loss(qt_opt.q_losses)     
@@ -117,7 +144,16 @@ def rollout_current_model(env,
             if is_collect_rollout: 
                 qt_opt.replay_buffer.push(state, action, reward, next_state, done)
                 if (None in qt_opt.replay_buffer.buffer):
+<<<<<<< HEAD
                     breakpoint()
+=======
+                    index = qt_opt.replay_buffer.buffer.index(None)
+                    qt_opt.replay_buffer.buffer.pop(index)
+                    qt_opt.replay_buffer.position =- 1
+                    print(state, action, reward, next_state, done)
+                    print("its hapenning")
+                    
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
                 if len(qt_opt.replay_buffer) % (max_steps*20) == 0: 
                     print("saving buffer")
                     with open(qt_opt.replay_buffer.file_name, 'wb') as file: 
@@ -129,6 +165,7 @@ def rollout_current_model(env,
 
         print('length of replay buffer: {} Episode: {}  | Reward:  {}'.format(len(qt_opt.replay_buffer), i_episode, episode_reward))
     
+<<<<<<< HEAD
 
 
 def plot_loss(q_losses):
@@ -145,3 +182,6 @@ def plot(rewards):
     plt.plot(rewards)
     plt.savefig('qt_opt_v3.png')
     # plt.show()
+=======
+    
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628

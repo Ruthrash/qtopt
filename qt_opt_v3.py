@@ -32,11 +32,19 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from IPython.display import display
 from reacher import Reacher
+<<<<<<< HEAD
 np.random.seed(300)
 import pickle
 import os
 
 from _qt_opt_funcs import train, collect_interaction_data, rollout_current_model, plot, plot_loss
+=======
+np.random.seed(111)
+import pickle
+import os
+
+from _qt_opt_funcs import train, collect_interaction_data, rollout_current_model
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
 
 # use_cuda = torch.cuda.is_available()
 # device   = torch.device("cuda" if use_cuda else "cpu")
@@ -80,6 +88,7 @@ class ReplayBuffer:
     def push(self, state, action, reward, next_state, done):
         if len(self.buffer) < self.capacity:
             self.buffer.append(None)
+<<<<<<< HEAD
 
         self.position = int((self.position + 1) % self.capacity)  # as a ring buffer        
         self.buffer[self.position] = (state, action, reward, next_state, done)
@@ -92,12 +101,31 @@ class ReplayBuffer:
         #     print(len(self.buffer), batch_size, len(batch))
         # except:
         #     print(self.buffer, batch_size, len(batch))
+=======
+        self.buffer[self.position] = (state, action, reward, next_state, done)
+        self.position = int((self.position + 1) % self.capacity)  # as a ring buffer
+    
+    def sample(self, batch_size):
+        print(len(self.buffer), batch_size)
+        batch = random.sample(self.buffer, batch_size)
+        try:
+            print(len(self.buffer), batch_size, len(batch))
+        except:
+            print(self.buffer, batch_size, len(batch))
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
         
         try:
             state, action, reward, next_state, done = map(np.stack, zip(*batch)) # stack for each element
         except: 
+<<<<<<< HEAD
             print("ITs happeninig again")
             breakpoint()
+=======
+            index = self.buffer.index(None)
+            self.buffer.pop(index)
+            print("ITs happeninig again")
+            # breakpoint()
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
         ''' 
         the * serves as unpack: sum(a,b) <=> batch=(a,b), sum(*batch) ;
         zip: a=[1,2], b=[2,3], zip(a,b) => [(1, 2), (2, 3)] ;
@@ -230,7 +258,10 @@ class QT_Opt():
         reward     = torch.FloatTensor(reward).unsqueeze(1).to(device)  # reward is single value, unsqueeze() to add one dim to be [reward] at the sample dim;
         done       = torch.FloatTensor(np.float32(done)).unsqueeze(1).to(device)
 
+<<<<<<< HEAD
         # print(state_)
+=======
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
         predict_q = self.qnet(state_, action) # predicted Q(s,a) value
 
         # get argmax_a' from the CEM for the target Q(s', a')
@@ -335,7 +366,24 @@ class QT_Opt():
     #         self.target_qnet2.train()
 
 
+<<<<<<< HEAD
 
+=======
+def plot_loss(q_losses):
+    clear_output(True)
+    plt.figure(figsize=(20,5))
+    # plt.subplot(131)
+    plt.plot(q_losses)
+    plt.savefig('qt_opt_v3_loss.png')   
+
+def plot(rewards):
+    clear_output(True)
+    plt.figure(figsize=(20,5))
+    # plt.subplot(131)
+    plt.plot(rewards)
+    plt.savefig('qt_opt_v3.png')
+    # plt.show()
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
 
 if __name__ == '__main__':
     
@@ -352,6 +400,7 @@ if __name__ == '__main__':
     SPARSE_REWARD=False
     SCREEN_SHOT=False
     env=Reacher(screen_size=SCREEN_SIZE, num_joints=NUM_JOINTS, link_lengths = LINK_LENGTH, \
+<<<<<<< HEAD
                 ini_joint_angles=INI_JOING_ANGLES, render=False, change_goal = True, 
                 change_goal_episodes = 10)
     
@@ -359,16 +408,28 @@ if __name__ == '__main__':
     action_dim = env.num_actions   # 2
     state_dim  = env.num_observations  # 6
 
+=======
+    ini_joint_angles=INI_JOING_ANGLES, target_pos = [743,530], render=False, change_goal = False)
+    
+    
+    action_dim = env.num_actions   # 2
+    state_dim  = env.num_observations  # 8
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
     hidden_dim = 512
     batch_size = 100
     qnet_model_path = './qt_opt_model/model'
     qnet1_model_path = './qt_opt_model/model1'
     qnet2_model_path = './qt_opt_model/model2'
+<<<<<<< HEAD
     replay_buffer_size = 5e7
+=======
+    replay_buffer_size = 5e9
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
     data_buffer_file = "buffer.pkl"
     if os.path.exists(data_buffer_file):
         file = open("buffer.pkl",'rb')
         buffer = pickle.load(file)    
+<<<<<<< HEAD
         try: 
             idx = buffer.index(None)
             buffer.pop(idx)
@@ -379,6 +440,12 @@ if __name__ == '__main__':
     else: 
         buffer = None
 
+=======
+    else: 
+        buffer = None
+    idx = buffer.index(None)
+    buffer.pop(idx)
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
     replay_buffer = ReplayBuffer(replay_buffer_size, buffer = buffer)
 
     qt_opt = QT_Opt(replay_buffer, hidden_dim)
@@ -391,10 +458,17 @@ if __name__ == '__main__':
             is_online_finetuning = True)
         
     if args.collect_data: 
+<<<<<<< HEAD
         env.render = True
         collect_interaction_data(qt_opt = qt_opt,
                                 env = env,
                                 max_episodes = 3500, 
+=======
+        env.render = False
+        collect_interaction_data(replay_buffer = replay_buffer, 
+                                env = env,
+                                max_episodes = 12000, 
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
                                 max_steps = 150, 
                                 frame_idx = 0, 
                                 use_noisy_expert = True, 
@@ -402,16 +476,22 @@ if __name__ == '__main__':
         
     if args.joint_online_finetuning: 
         print("Is it training??", qt_opt.qnet.training)
+<<<<<<< HEAD
         # qt_opt.load_checkpoint(qnet_chkpoint_path = qnet_model_path, 
         #                 qnet1_path = qnet1_model_path, 
         #                 qnet2_path = qnet2_model_path, 
         #                 is_only_inference = False)
+=======
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
         # train(env = env, 
         #     qt_opt = qt_opt, 
         #     n_epochs = 30000, 
         #     batch_size = batch_size, 
+<<<<<<< HEAD
         #     rollout_every_n_updates = 1000,
         #     is_rollout_model = True,
+=======
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
         #     is_online_finetuning = False,
         #     qnet_checkpoint_path = qnet_model_path , 
         #     qnet1_model_path = qnet1_model_path,
@@ -423,14 +503,22 @@ if __name__ == '__main__':
         print("Is it training??", qt_opt.qnet.training)  
         qnet_model_path = './qt_opt_model1/model'
         qnet1_model_path = './qt_opt_model1/model1'
+<<<<<<< HEAD
         qnet2_model_path = './qt_opt_model1/model2'     
+=======
+        qnet2_model_path = './qt_opt_model1/model2'      
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
         train(env = env, 
               batch_size = batch_size,
             qt_opt = qt_opt, 
             n_epochs = 90000, 
             rollout_every_n_updates = 5000,
             is_rollout_model = True,
+<<<<<<< HEAD
             is_online_finetuning = False,
+=======
+            is_online_finetuning = True,
+>>>>>>> d421c56399a4b68cb3da44bcf3d58d0a55cf7628
             qnet_checkpoint_path = qnet_model_path , 
             qnet1_model_path = qnet1_model_path,
             qnet2_model_path = qnet2_model_path)        
